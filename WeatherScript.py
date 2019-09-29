@@ -3,12 +3,12 @@ from ApiKeys import twilioKeys, accuWeather, numbersToText
 import requests
 
 TEMPERATURE_MESSAGES = {
-    "freezing": "Oh no :( It's gonna be really cold today: {0} degrees!! The high today is {1} degrees. Make sure you really layer up and wear a good winter coat!\n\n",
-    "sweaterWeather": "It's gonna get chilly today with a low of: {0} degrees! The high today is {1} degrees. Make sure you wear a sweater!\n\n",
-    "sweaterLayers": "It's gonna get chilly today: {0} degrees! But it will get hotter to {1} degrees, so make sure you wear something you can take off\n\n",
-    "perfectWeather": "We're gonna have great weather today: {0} degrees :) You can layer lightly if you want\n\n ",
-    "warmWeather": "It's gonna be warm today! It's gonna get up to {0} degrees! Make sure you wear something light.\n\n",
-    "hotWeather": "It's gonna be really hot today. It's gonna get up to {0} degrees. Don't wear anything heavy today!!\n\n"
+    "freezing": "Oh no :( It's gonna be really cold today: {0} degrees!!\n The high today is {1} degrees.\n Make sure you really layer up and wear a good winter coat!\n\n",
+    "sweaterWeather": "It's gonna get chilly today with a low of: {0} degrees!\n The high today is {1} degrees.\n Make sure you wear a sweater!\n\n",
+    "sweaterLayers": "It's gonna get chilly today: {0} degrees!\n But it will get hotter to {1} degrees, so make sure you wear something you can take off\n\n",
+    "perfectWeather": "We're gonna have great weather today: {0} degrees :)\n You can layer lightly if you want\n\n ",
+    "warmWeather": "It's gonna be warm today! It's gonna get up to {0} degrees!\n Make sure you wear something light.\n\n",
+    "hotWeather": "It's gonna be really hot today. It's gonna get up to {0} degrees.\n Don't wear anything heavy today!!\n\n"
 }
 PRECIPITATION_MESSAGES = {
     "precipitation": "There is a {0}% chance of {1} during the {2}\n",
