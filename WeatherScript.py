@@ -119,14 +119,12 @@ def getMessagesForWeather(weatherJson):
 def textWeather(weatherJson):
     client = Client(twilioKeys["accountSid"], twilioKeys["authToken"])
     messageToText = "\n\n" + getMessagesForWeather(weatherJson)
-    print(messageToText)
-    """
     for number in numbersToText:
         client.messages.create(
             to= number,
             from_ = twilioKeys["twilioNumber"],
             body = messageToText
-        )"""
+        )
 
 def getWeatherInfo(): 
     weatherURL = "https://api.darksky.net/forecast/{0}/{1},{2}".format(darkSky["apiKey"], latitude, longitude)
