@@ -95,7 +95,7 @@ def getAverageTemperaturesForMorningToEvening(hourlyData):
 def getMessagesForWeather(weatherJson): 
     weatherData = weatherJson["daily"]["data"][0]
     hourlyData = weatherJson["hourly"]["data"]
-    message = "Good morning! This is your weather for today: {0}\n\n".format(weatherData["summary"])
+    message = "Good morning! Today it will be: {0}\n\n".format(weatherData["summary"])
     weatherInfo = {
         "minTemp": {
             "temp": round(weatherData["apparentTemperatureLow"]), 
@@ -110,6 +110,7 @@ def getMessagesForWeather(weatherJson):
         "alerts": weatherData.get("alerts", []),
         "averageTempsThroughDay": getAverageTemperaturesForMorningToEvening(hourlyData)
     }
+    print(weatherInfo)
     message += getOutfitSuggestion(weatherInfo["minTemp"], weatherInfo["maxTemp"])
     message += getAverageTempMessages(weatherInfo["averageTempsThroughDay"])
     message += getPrecipitationMessage(weatherInfo["precipitationProb"], weatherInfo["precipType"]) 
