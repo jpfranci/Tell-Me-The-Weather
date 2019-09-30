@@ -13,7 +13,10 @@ TEMPERATURE_MESSAGES = {
 }
 PRECIPITATION_MESSAGES = {
     "precipitation": "Oh no! There is a {0}% chance of {1} today\n",
-    "noPrecipitation": "Yay! You don't have to worry about rain today, there is only a {0}% chance of {1} today!\n"
+    "noPrecipitation": "Yay! You don't have to worry about rain today because there is only a {0}% chance of {1} today!\n"
+}
+AVERAGE_TEMP_MESSAGES = {
+    "averageTemp": "Average temperature from {0} to {1}: {2} degrees\n"
 }
 PRECIPITATION_MESSAGE_THRESHOLD = 20
 HOURS_OF_SUN_THRESHOLD = 2
@@ -58,39 +61,77 @@ def addTimePrecipitationMessage(message, precipitationType, precipitationProbabi
         message += PRECIPITATION_MESSAGES["noPrecipitation"].format(precipitationProbability, precipitationType)
     return message
 
+def getAlertsMessage(alerts):
+    message = ""
+    for alert in alerts:
+        message += "{0} Alert: {1}\n {2}\n Find out more at {3}\n\n".format(alert["severity"].capitalize(), alert["title"], alert["description"], alert["uri"])
+    return message
+
+def getAverageTempMessages(averageTemps):
+    message = ""
+    for averageTempObj in averageTemps.values():
+        message += AVERAGE_TEMP_MESSAGES["averageTemp"].format(averageTempObj["startTime"], averageTempObj["endTime"], averageTempObj["temp"])
+    return message + "\n"
+
+def getTimeFromSeconds(seconds):
+    return datetime.fromtimestamp(seconds).strftime("%I:%M %p")
+
+def getAverageTemperatures(weatherArray):
+    averageTemp = sum(list(map(lambda hourlyData : hourlyData["apparentTemperature"], weatherArray))) / len(weatherArray)
+    averageTemp = round(averageTemp)
+    return {
+        "temp": averageTemp,
+        "startTime": getTimeFromSeconds(weatherArray[0]["time"]),
+        "endTime": getTimeFromSeconds(weatherArray[-1]["time"])
+    }
+
+def getAverageTemperaturesForMorningToEvening(hourlyData):
+    averageTemps = {}
+    averageTemps["morning"] = getAverageTemperatures(hourlyData[0:6])
+    averageTemps["afternoon"] = getAverageTemperatures(hourlyData[6:12])
+    averageTemps["evening"] = getAverageTemperatures(hourlyData[12:18])
+    return averageTemps
+
 def getMessagesForWeather(weatherJson): 
     weatherData = weatherJson["daily"]["data"][0]
+    hourlyData = weatherJson["hourly"]["data"]
     message = "Good morning! This is your weather for today: {0}\n\n".format(weatherData["summary"])
     weatherInfo = {
         "minTemp": {
             "temp": round(weatherData["apparentTemperatureLow"]), 
-            "time": datetime.fromtimestamp(weatherData["apparentTemperatureLowTime"]).strftime("%I:%M %p")
+            "time": getTimeFromSeconds(weatherData["apparentTemperatureLowTime"])
         },
         "maxTemp": {
             "temp": round(weatherData['apparentTemperatureHigh']),
-            "time": datetime.fromtimestamp(weatherData["apparentTemperatureHighTime"]).strftime("%I:%M %p")
+            "time": getTimeFromSeconds(weatherData["apparentTemperatureHighTime"])
         },
         "precipitationProb": round(weatherData['precipProbability'] * 100),
-        "precipType": weatherData.get('precipType', 'precipitation')
+        "precipType": weatherData.get('precipType', 'precipitation'),
+        "alerts": weatherData.get("alerts", []),
+        "averageTempsThroughDay": getAverageTemperaturesForMorningToEvening(hourlyData)
     }
     message += getOutfitSuggestion(weatherInfo["minTemp"], weatherInfo["maxTemp"])
+    message += getAverageTempMessages(weatherInfo["averageTempsThroughDay"])
     message += getPrecipitationMessage(weatherInfo["precipitationProb"], weatherInfo["precipType"]) 
+    message += getAlertsMessage(weatherInfo["alerts"])
     return message
     
 def textWeather(weatherJson):
     client = Client(twilioKeys["accountSid"], twilioKeys["authToken"])
     messageToText = "\n\n" + getMessagesForWeather(weatherJson)
+    print(messageToText)
+    """
     for number in numbersToText:
         client.messages.create(
             to= number,
             from_ = twilioKeys["twilioNumber"],
             body = messageToText
-        )
+        )"""
 
 def getWeatherInfo(): 
     weatherURL = "https://api.darksky.net/forecast/{0}/{1},{2}".format(darkSky["apiKey"], latitude, longitude)
     params = {
-        "exclude": "currently,minutely,hourly",
+        "exclude": "currently,minutely",
         "units": "si"
     }
     return requests.get(url = weatherURL, params = params)
@@ -100,7 +141,7 @@ def main():
     if response.status_code == 200:
         textWeather(response.json())
     else:
-        print('error')
+        print('Error when trying to get weather info')
 
 if __name__ == '__main__':
     main()
